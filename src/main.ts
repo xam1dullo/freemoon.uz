@@ -11,7 +11,7 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
-
+  app.enableCors({ origin: '*' });
   // Swagger konfiguratsiyasi
   const config = new DocumentBuilder()
     .setTitle('Free Moon API')
