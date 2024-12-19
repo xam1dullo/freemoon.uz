@@ -1,66 +1,39 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsOptional } from 'class-validator';
 
 export class CourseResponseDto {
   @ApiProperty({
-    description: 'Kursning MongoDB ObjectId',
-    example: '63a5f8e2c23e2b0c888b4567',
+    description: 'Kurs ID-si',
+    example: '60c72b2f9f1b2c001f0e4abe',
   })
-  id: string;
+  _id: string;
 
-  @ApiProperty({
-    description: 'Kursning sarlavhasi',
-    example: 'Frontend Development',
-  })
+  @ApiProperty({ description: 'Kurs nomi', example: 'Node.js Developer' })
   title: string;
 
   @ApiProperty({
     description: 'Kurs tavsifi',
-    example: 'Learn HTML, CSS, and JavaScript.',
+    example: 'Node.js asoslari va amaliy mashqlar',
   })
   description?: string;
 
-  @ApiProperty({ description: 'Mentorning ismi', example: 'John Doe' })
-  mentor_name?: string;
-
   @ApiProperty({
-    description: "Mentor haqida ma'lumot",
-    example: 'Senior Frontend Developer',
-  })
-  mentor_info?: string;
-
-  @ApiProperty({
-    description: 'Mentorning rasmi URL manzili',
-    example: 'https://example.com/mentor.jpg',
-  })
-  mentor_image?: string;
-
-  @ApiProperty({
-    description: 'Mentorning MongoDB ObjectId',
-    example: '63a5f8e2c23e2b0c888b4567',
+    description: 'Mentor ID-si',
+    example: '60c72b2f9f1b2c001f0e4abc',
   })
   mentor: string;
 
-  @ApiProperty({ description: 'Kurs narxi', example: 199.99 })
+  @ApiProperty({ description: 'Kurs narxi', example: 100000 })
   price: number;
 
   @ApiProperty({
-    description: 'Kurs yaratilgan sana',
-    example: '2024-12-19T08:00:00.000Z',
+    description: 'Kategoriya ID-si',
+    example: '60c72b2f9f1b2c001f0e4abd',
   })
-  created_at: Date;
+  category: string;
 
-  @ApiProperty({
-    description: 'Kurs yangilangan sana',
-    example: '2024-12-19T09:00:00.000Z',
-  })
-  updated_at: Date;
+  @ApiProperty({ description: 'Yaratilgan vaqt' })
+  createdAt: Date;
 
-  @ApiProperty({
-    description: 'Kurs modullari',
-    example: [{ name: 'Introduction', duration: '10min' }],
-  })
-  @IsArray()
-  @IsOptional()
-  modules?: any[];
+  @ApiProperty({ description: 'Yangilangan vaqt' })
+  updatedAt: Date;
 }

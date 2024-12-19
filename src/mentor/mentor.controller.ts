@@ -15,6 +15,8 @@ import {
   ApiResponse,
   ApiBody,
   ApiConsumes,
+  ApiNotFoundResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { MentorService } from './mentor.service';
 import { CreateMentorDto } from './dto/create-mentor.dto';
@@ -23,7 +25,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { ImageKitService } from 'imagekit-nestjs';
 
-@ApiTags('Mentors') // Swagger bo'lim nomi
+@ApiTags('Mentors')
 @Controller('mentors')
 export class MentorController {
   constructor(
@@ -32,10 +34,18 @@ export class MentorController {
   ) {}
 
   @ApiOperation({ summary: 'Yangi mentor yaratish' })
+  @ApiBody({
+    type: CreateMentorDto,
+    description: 'Yaratish uchun kerakli ma’lumotlar',
+  })
   @ApiResponse({
     status: 201,
     description: 'Mentor muvaffaqiyatli yaratildi.',
     type: Mentor,
+  })
+  @ApiNotFoundResponse({ description: 'Berilgan kategoriyani topib bo‘lmadi.' })
+  @ApiInternalServerErrorResponse({
+    description: 'Ichki server xatosi yuz berdi.',
   })
   @Post()
   async create(@Body() dto: CreateMentorDto): Promise<Mentor> {
@@ -62,9 +72,12 @@ export class MentorController {
     schema: {
       type: 'object',
       properties: {
-        url: { type: 'string', example: 'https://example.com/image.jpg' },
+        url: { type: 'string' },
       },
     },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Rasm yuklashda xato yuz berdi.',
   })
   @Post('upload-image')
   @UseInterceptors(
@@ -87,6 +100,9 @@ export class MentorController {
     description: 'Mentorlar roʻyxati muvaffaqiyatli olindi.',
     type: [Mentor],
   })
+  @ApiInternalServerErrorResponse({
+    description: 'Mentorlarni olishda xatolik yuz berdi.',
+  })
   @Get()
   async findAll(): Promise<Mentor[]> {
     return this.mentorService.findAll();
@@ -98,17 +114,28 @@ export class MentorController {
     description: 'Mentor muvaffaqiyatli topildi.',
     type: Mentor,
   })
-  @ApiResponse({ status: 404, description: 'Mentor topilmadi.' })
+  @ApiNotFoundResponse({ description: 'Mentor topilmadi.' })
+  @ApiInternalServerErrorResponse({
+    description: 'Mentorni olishda xatolik yuz berdi.',
+  })
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Mentor> {
     return this.mentorService.findOne(id);
   }
 
   @ApiOperation({ summary: "Mentor ma'lumotlarini yangilash" })
+  @ApiBody({
+    type: CreateMentorDto,
+    description: 'Yangilanishi kerak bo‘lgan ma’lumotlar',
+  })
   @ApiResponse({
     status: 200,
     description: 'Mentor muvaffaqiyatli yangilandi.',
     type: Mentor,
+  })
+  @ApiNotFoundResponse({ description: 'Yangilanadigan mentor topilmadi.' })
+  @ApiInternalServerErrorResponse({
+    description: 'Mentorni yangilashda xatolik yuz berdi.',
   })
   @Put(':id')
   async update(
@@ -123,7 +150,12 @@ export class MentorController {
     status: 200,
     description: "Mentor muvaffaqiyatli o'chirildi.",
   })
-  @ApiResponse({ status: 404, description: 'Mentor topilmadi.' })
+  @ApiNotFoundResponse({
+    description: 'O‘chirilishi kerak bo‘lgan mentor topilmadi.',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Mentorni o‘chirishda xatolik yuz berdi.',
+  })
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<void> {
     return this.mentorService.delete(id);

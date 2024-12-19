@@ -30,4 +30,11 @@ export class CreateMentorDto {
   @IsString()
   @IsOptional()
   readonly image_url?: string;
+
+  @ApiProperty({
+    description: 'Category id',
+    example: '63a5f8e2c23e2b0c888b4567',
+  })
+  @IsString()
+  category: string;
 }

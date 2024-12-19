@@ -1,21 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsArray, ArrayNotEmpty, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString, IsArray } from 'class-validator';
 
 export class CreateSkillsDto {
   @ApiProperty({
     description: 'Kategoriya nomi',
-    example: 'Programming Tools',
+    example: 'Dasturlash tillari',
   })
   @IsString()
   @IsNotEmpty()
-  readonly category: string;
+  category: string;
 
   @ApiProperty({
-    description: 'Kategoriya ichidagi elementlar ro‘yxati',
-    example: ['JavaScript', 'TypeScript', 'Node.js', 'React'],
-    isArray: true,
+    description: "Ko'nikmalar ro'yxati",
+    example: ['JavaScript', 'TypeScript', 'Node.js'],
   })
   @IsArray()
-  @ArrayNotEmpty()
-  readonly items: string[];
+  @IsNotEmpty()
+  items: string[];
 }

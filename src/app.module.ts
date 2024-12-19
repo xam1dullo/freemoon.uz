@@ -18,6 +18,7 @@ import { ToolsModule } from './tools/tools.module';
 // import { Skills } from './skills/entities/skill.entity';
 // import { Tools } from './tools/entities/tool.entity';
 // import { Content } from './content/entities/content.entity';
+import { CategoryModule } from './category/category.module';
 
 const DEFAULT_ADMIN = {
   email: 'admin',
@@ -100,6 +101,7 @@ const authenticate = async (email: string, password: string) => {
     MentorModule,
     SkillsModule,
     ToolsModule,
+    CategoryModule,
     // CourseModulesModule,
   ],
 })

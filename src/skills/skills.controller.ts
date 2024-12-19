@@ -1,79 +1,106 @@
 import {
   Controller,
-  Post,
   Get,
+  Post,
+  Body,
+  Param,
   Put,
   Delete,
-  Param,
-  Body,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiNotFoundResponse,
+  ApiInternalServerErrorResponse,
+  ApiBody,
+} from '@nestjs/swagger';
+
 import { SkillsService } from './skills.service';
 import { CreateSkillsDto } from './dto/create-skill.dto';
+import { SkillsResponseDto } from './dto/response.skill.dto';
 import { Skills } from './entities/skill.entity';
+import { UpdateSkillDto } from './dto/update-skill.dto';
 
-@ApiTags('Skills') // Swagger bo'limi nomi
+@ApiTags('Skills')
 @Controller('skills')
 export class SkillsController {
   constructor(private readonly skillsService: SkillsService) {}
 
-  @ApiOperation({ summary: 'Yangi ko‘nikma qo‘shish' })
+  @ApiOperation({ summary: 'Yangi skill kategoriyasi yaratish' })
+  @ApiBody({ type: CreateSkillsDto })
   @ApiResponse({
     status: 201,
-    description: 'Ko‘nikma muvaffaqiyatli yaratildi.',
-    type: Skills,
+    description: 'Skill kategoriya muvaffaqiyatli yaratildi.',
+    type: SkillsResponseDto,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Ichki server xatosi yuz berdi.',
   })
   @Post()
-  async create(@Body() dto: CreateSkillsDto): Promise<Skills> {
-    return this.skillsService.create(dto);
+  async create(@Body() createDto: CreateSkillsDto): Promise<Skills> {
+    return this.skillsService.create(createDto);
   }
 
-  @ApiOperation({ summary: 'Barcha ko‘nikmalarni olish' })
+  @ApiOperation({ summary: 'Barcha skill kategoriyalarini olish' })
   @ApiResponse({
     status: 200,
-    description: 'Ko‘nikmalar ro‘yxati muvaffaqiyatli olindi.',
-    type: [Skills],
+    description: 'Skill kategoriyalar muvaffaqiyatli olindi.',
+    type: [SkillsResponseDto],
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Ichki server xatosi yuz berdi.',
   })
   @Get()
   async findAll(): Promise<Skills[]> {
     return this.skillsService.findAll();
   }
 
-  @ApiOperation({ summary: 'ID bo‘yicha ko‘nikmani olish' })
+  @ApiOperation({ summary: 'ID bo‘yicha skill kategoriyasini olish' })
   @ApiResponse({
     status: 200,
-    description: 'Ko‘nikma muvaffaqiyatli topildi.',
-    type: Skills,
+    description: 'Skill kategoriya muvaffaqiyatli topildi.',
+    type: SkillsResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Ko‘nikma topilmadi.' })
+  @ApiNotFoundResponse({ description: 'Skill kategoriya topilmadi.' })
+  @ApiInternalServerErrorResponse({
+    description: 'Ichki server xatosi yuz berdi.',
+  })
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Skills> {
     return this.skillsService.findOne(id);
   }
 
-  @ApiOperation({ summary: 'ID bo‘yicha ko‘nikmani yangilash' })
+  @ApiOperation({ summary: 'Skill kategoriyasini yangilash' })
+  @ApiBody({ type: UpdateSkillDto })
   @ApiResponse({
     status: 200,
-    description: 'Ko‘nikma muvaffaqiyatli yangilandi.',
-    type: Skills,
+    description: 'Skill kategoriya muvaffaqiyatli yangilandi.',
+    type: SkillsResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Ko‘nikma topilmadi.' })
+  @ApiNotFoundResponse({ description: 'Skill kategoriya topilmadi.' })
+  @ApiInternalServerErrorResponse({
+    description: 'Ichki server xatosi yuz berdi.',
+  })
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() dto: CreateSkillsDto,
+    @Body() updateDto: UpdateSkillDto,
   ): Promise<Skills> {
-    return this.skillsService.update(id, dto);
+    return this.skillsService.update(id, updateDto);
   }
 
-  @ApiOperation({ summary: 'ID bo‘yicha ko‘nikmani o‘chirish' })
+  @ApiOperation({ summary: "Skill kategoriyasini o'chirish" })
   @ApiResponse({
     status: 200,
-    description: 'Ko‘nikma muvaffaqiyatli o‘chirildi.',
+    description: 'Skill kategoriya muvaffaqiyatli o‘chirildi.',
   })
-  @ApiResponse({ status: 404, description: 'Ko‘nikma topilmadi.' })
+  @ApiNotFoundResponse({ description: 'Skill kategoriya topilmadi.' })
+  @ApiInternalServerErrorResponse({
+    description: 'Ichki server xatosi yuz berdi.',
+  })
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<void> {
-    return this.skillsService.delete(id);
+  async remove(@Param('id') id: string): Promise<void> {
+    return this.skillsService.remove(id);
   }
 }
