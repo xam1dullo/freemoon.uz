@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsOptional } from 'class-validator';
 
 export class CourseResponseDto {
   @ApiProperty({
@@ -54,4 +55,12 @@ export class CourseResponseDto {
     example: '2024-12-19T09:00:00.000Z',
   })
   updated_at: Date;
+
+  @ApiProperty({
+    description: 'Kurs modullari',
+    example: [{ name: 'Introduction', duration: '10min' }],
+  })
+  @IsArray()
+  @IsOptional()
+  modules?: any[];
 }

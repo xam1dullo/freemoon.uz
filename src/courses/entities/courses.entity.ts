@@ -26,6 +26,8 @@ export class Course {
   @Prop({ default: 0 })
   price: number;
 
+  @Prop({ type: [Object], default: [] }) // Modul bo'limi
+  modules: any[];
   @Prop({ default: Date.now })
   created_at: Date;
 
