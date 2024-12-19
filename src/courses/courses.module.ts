@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Course, CourseSchema } from './entities/courses.entity';
 import { CoursesController } from './courses.controller';
 import { CoursesService } from './courses.service';
-import { MentorModule } from 'src/mentor/mentor.module';
+import { MentorModule } from '../mentor/mentor.module';
 
 @Module({
   imports: [
