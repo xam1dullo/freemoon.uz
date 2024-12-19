@@ -57,4 +57,10 @@ export class CreateCourseDto {
   @IsNumber()
   @IsOptional()
   price?: number;
+
+  @ApiProperty({
+    description: 'Kurs modullari',
+    example: [{ name: 'Introduction', duration: '10min' }],
+  })
+  modules: any[];
 }
