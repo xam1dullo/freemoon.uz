@@ -41,17 +41,45 @@ export class MentorService {
    * Retrieve all mentors.
    * Using `.lean()` for performance since we only need plain objects.
    */
-  async findAll(): Promise<Mentor[]> {
+  async findAll(
+    page: number,
+    limit: number,
+    search?: string,
+    category?: string,
+  ): Promise<{ data: Mentor[]; total: number; page: number; limit: number }> {
     try {
-      const mentors = await this.mentorModel
-        .find()
-        .lean()
-        .populate('category') // Populate the 'category' field
+      const query: any = {};
+
+      // Agar category kelgan bo'lsa queryga qo'shamiz
+      if (category) {
+        query.category = category;
+      }
+
+      // Agar search kelgan bo'lsa full_name yoki description bo'yicha qidiramiz
+      if (search) {
+        query.$or = [
+          { full_name: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+        ];
+      }
+
+      const total = await this.mentorModel.countDocuments(query).exec();
+
+      const data = await this.mentorModel
+        .find(query)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate('category') // agar category mentorga populate qilish kerak bo'lsa
         .exec();
-      return mentors as Mentor[];
+
+      return {
+        data,
+        total,
+        page,
+        limit,
+      };
     } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException('Failed to retrieve mentors');
+      throw new InternalServerErrorException('Failed to fetch mentors');
     }
   }
 

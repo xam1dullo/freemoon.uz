@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,6 +15,7 @@ import {
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 import { SkillsService } from './skills.service';
@@ -42,18 +44,47 @@ export class SkillsController {
     return this.skillsService.create(createDto);
   }
 
-  @ApiOperation({ summary: 'Barcha skill kategoriyalarini olish' })
+  @ApiOperation({
+    summary:
+      'Barcha skill kategoriyalarni filter, search va pagination bilan olish',
+  })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
+  @ApiQuery({ name: 'search', required: false, description: "Qidirish so'z" })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    description: "Kategoriya bo'yicha filter",
+  })
   @ApiResponse({
     status: 200,
     description: 'Skill kategoriyalar muvaffaqiyatli olindi.',
-    type: [SkillsResponseDto],
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Ichki server xatosi yuz berdi.',
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array', items: { $ref: '#/components/schemas/Skills' } },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        limit: { type: 'number' },
+      },
+    },
   })
   @Get()
-  async findAll(): Promise<Skills[]> {
-    return this.skillsService.findAll();
+  async findAll(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ): Promise<{ data: Skills[]; total: number; page: number; limit: number }> {
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+
+    return this.skillsService.findAll(
+      pageNumber,
+      limitNumber,
+      search,
+      category,
+    );
   }
 
   @ApiOperation({ summary: 'ID bo‘yicha skill kategoriyasini olish' })

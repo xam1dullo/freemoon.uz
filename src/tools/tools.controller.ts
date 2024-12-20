@@ -6,11 +6,12 @@ import {
   Delete,
   Param,
   Body,
+  Query,
 } from '@nestjs/common';
 import { ToolsService } from './tools.service';
 import { CreateToolsDto } from './dto/create-tool.dto';
 import { Tools } from './entities/tool.entity';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Tools') // Swaggerda bo'limni belgilash
 @Controller('tools')
@@ -27,11 +28,41 @@ export class ToolsController {
     return this.toolsService.create(dto);
   }
 
-  @ApiOperation({ summary: 'Barcha asboblarni olish' })
-  @ApiResponse({ status: 200, description: 'Asboblar muvaffaqiyatli olindi.' })
+  @ApiOperation({
+    summary: 'Barcha toollarni filter, search va pagination bilan olish',
+  })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
+  @ApiQuery({ name: 'search', required: false, description: "Qidirish so'z" })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    description: "Kategoriya bo'yicha filter",
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tools muvaffaqiyatli olindi.',
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array', items: { $ref: '#/components/schemas/Tools' } },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        limit: { type: 'number' },
+      },
+    },
+  })
   @Get()
-  async findAll(): Promise<Tools[]> {
-    return this.toolsService.findAll();
+  async findAll(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ): Promise<{ data: Tools[]; total: number; page: number; limit: number }> {
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+
+    return this.toolsService.findAll(pageNumber, limitNumber, search, category);
   }
 
   @ApiOperation({ summary: 'Bitta asbobni olish' })

@@ -24,11 +24,39 @@ export class SkillsService {
     }
   }
 
-  async findAll(): Promise<Skills[]> {
+  async findAll(
+    page: number,
+    limit: number,
+    search?: string,
+    category?: string,
+  ): Promise<{ data: Skills[]; total: number; page: number; limit: number }> {
     try {
-      return await this.skillsModel.find().exec();
+      const query: any = {};
+
+      // category filter
+      if (category) {
+        query.category = { $regex: category, $options: 'i' };
+      }
+
+      // search agar kelsa category yoki items ichida qidirish
+      if (search) {
+        query.$or = [
+          { category: { $regex: search, $options: 'i' } },
+          { items: { $regex: search, $options: 'i' } },
+          // 'items' array bo'lgani uchun, regex bilan qidirish items ichidagi stringlarni ham qamrab oladi
+        ];
+      }
+
+      const total = await this.skillsModel.countDocuments(query).exec();
+      const data = await this.skillsModel
+        .find(query)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec();
+
+      return { data, total, page, limit };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve skills');
+      throw new InternalServerErrorException('Failed to fetch skills');
     }
   }
 

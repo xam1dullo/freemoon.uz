@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Tools } from './entities/tool.entity';
@@ -15,8 +19,39 @@ export class ToolsService {
     return newTools.save();
   }
 
-  async findAll(): Promise<Tools[]> {
-    return this.toolsModel.find().exec();
+  async findAll(
+    page: number,
+    limit: number,
+    search?: string,
+    category?: string,
+  ): Promise<{ data: Tools[]; total: number; page: number; limit: number }> {
+    try {
+      const query: any = {};
+
+      if (category) {
+        query.category = category;
+      }
+
+      if (search) {
+        // title yoki description ichida qidirish
+        query.$or = [
+          { title: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+        ];
+      }
+
+      const total = await this.toolsModel.countDocuments(query).exec();
+      const data = await this.toolsModel
+        .find(query)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        // Agar tools ham mentor yoki category bilan bog'langan bo'lsa populate qilishingiz mumkin
+        .exec();
+
+      return { data, total, page, limit };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch tools');
+    }
   }
 
   async findOne(id: string): Promise<Tools> {

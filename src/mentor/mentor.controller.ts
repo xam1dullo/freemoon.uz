@@ -8,6 +8,7 @@ import {
   Body,
   UseInterceptors,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,6 +18,7 @@ import {
   ApiConsumes,
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { MentorService } from './mentor.service';
 import { CreateMentorDto } from './dto/create-mentor.dto';
@@ -94,18 +96,62 @@ export class MentorController {
     return { url: result.url };
   }
 
-  @ApiOperation({ summary: 'Barcha mentorlarni olish' })
+  @ApiOperation({
+    summary: 'Barcha mentorlarni olish (filter, search, pagination bilan)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Sahifa raqami',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Har sahifada nechta yozuv',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Qidirish so`zi',
+    example: 'John',
+  })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    description: 'Kategoriya ID',
+    example: '60c72b2f9f1b2c001f0e4abd',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Mentorlar roʻyxati muvaffaqiyatli olindi.',
-    type: [Mentor],
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Mentorlarni olishda xatolik yuz berdi.',
+    description: 'Mentorlar muvaffaqiyatli olindi.',
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array', items: { $ref: '#/components/schemas/Mentor' } },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        limit: { type: 'number' },
+      },
+    },
   })
   @Get()
-  async findAll(): Promise<Mentor[]> {
-    return this.mentorService.findAll();
+  async findAll(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ): Promise<{ data: Mentor[]; total: number; page: number; limit: number }> {
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+
+    return this.mentorService.findAll(
+      pageNumber,
+      limitNumber,
+      search,
+      category,
+    );
   }
 
   @ApiOperation({ summary: 'ID orqali mentorni olish' })
