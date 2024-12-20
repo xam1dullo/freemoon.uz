@@ -8,6 +8,7 @@ import {
   Param,
   UseInterceptors,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,6 +18,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiBody,
   ApiConsumes,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -26,6 +28,7 @@ import { CoursesService } from './courses.service';
 import { CourseResponseDto } from './dto/course-response.dto';
 import { UpdateCourseDto } from './dto/update-courses.dto';
 import { CreateCourseDto } from './dto/create-courses.dto';
+import { Course } from './entities/courses.entity';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -35,18 +38,62 @@ export class CoursesController {
     private readonly imageKitService: ImageKitService,
   ) {}
 
-  @ApiOperation({ summary: 'Barcha kurslarni olish' })
+  @ApiOperation({
+    summary: 'Barcha kurslarni olish (filter va pagination bilan)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Sahifa raqami',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Har sahifada nechta yozuv',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Qidirish so`zi',
+    example: 'node',
+  })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    description: 'Kategoriya ID',
+    example: '60c72...',
+  })
   @ApiResponse({
     status: 200,
     description: 'Kurslar muvaffaqiyatli olindi.',
-    type: [CourseResponseDto],
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Ichki server xatosi yuz berdi.',
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array', items: { $ref: '#/components/schemas/Course' } },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        limit: { type: 'number' },
+      },
+    },
   })
   @Get()
-  async getAll() {
-    return this.coursesService.getAllCourses();
+  async findAll(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ): Promise<{ data: Course[]; total: number; page: number; limit: number }> {
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+
+    return this.coursesService.getAllCourses(
+      pageNumber,
+      limitNumber,
+      search,
+      category,
+    );
   }
 
   @ApiOperation({ summary: 'ID bo‘yicha kursni olish' })

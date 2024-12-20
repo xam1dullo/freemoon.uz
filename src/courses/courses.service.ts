@@ -17,17 +17,46 @@ export class CoursesService {
     private readonly categoryService: CategoryService,
   ) {}
 
-  async getAllCourses(): Promise<Course[]> {
+  async getAllCourses(
+    page: number,
+    limit: number,
+    search?: string,
+    category?: string,
+  ): Promise<{ data: Course[]; total: number; page: number; limit: number }> {
     try {
-      return await this.courseModel
-        .find()
+      const query: any = {};
+
+      // Agar category kelgan bo'lsa, filterga qo'shamiz
+      if (category) {
+        query.category = category;
+      }
+
+      // Agar search kelgan bo'lsa, title yoki description bo'yicha qidirish
+      if (search) {
+        query.$or = [
+          { title: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+        ];
+      }
+
+      const total = await this.courseModel.countDocuments(query).exec();
+
+      const data = await this.courseModel
+        .find(query)
+        .skip((page - 1) * limit)
+        .limit(limit)
         .populate('mentor')
         .populate('category')
         .exec();
-    } catch (error) {
-      console.error(error);
 
-      throw new InternalServerErrorException('Failed to retrieve courses');
+      return {
+        data,
+        total,
+        page,
+        limit,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch courses');
     }
   }
 
