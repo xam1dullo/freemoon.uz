@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "prod": "pnpm exec pm2 kill --name freemoon && pnpm run build && pnpm exec pm2 start -i max --name freemoon dist/main.js"
   },
   "dependencies": {
     "@adminjs/express": "^6.1.1",
@@ -60,6 +61,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "jest": "^29.5.0",
+    "pm2": "^5.4.3",
     "prettier": "^3.0.0",
     "prisma": "^6.1.0",
     "source-map-support": "^0.5.21",
