@@ -1,20 +1,37 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsArray } from 'class-validator';
+// src/skills/dto/create-skills.dto.ts
+
+import {
+  IsOptional,
+  IsString,
+  IsArray,
+  ArrayNotEmpty,
+  IsMongoId,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateSkillsDto {
-  @ApiProperty({
-    description: 'Kategoriya nomi',
-    example: 'Dasturlash tillari',
+  @ApiPropertyOptional({
+    description: "Kategoriya nomi (masalan: 'Ko'nikmalar')",
+    example: 'Programming Languages',
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  category: string;
+  category?: string;
 
   @ApiProperty({
-    description: "Ko'nikmalar ro'yxati",
-    example: ['JavaScript', 'TypeScript', 'Node.js'],
+    description: "Har bir kategoriya uchun ko'nikmalar ro'yxati",
+    example: ['JavaScript', 'TypeScript'],
+    type: [String],
   })
   @IsArray()
-  @IsNotEmpty()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
   items: string[];
+
+  @ApiProperty({
+    description: 'Kurs ID',
+    example: '64b3c3c4f1a6a30a3c3a6a1a',
+  })
+  @IsMongoId()
+  courseId: string;
 }

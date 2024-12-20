@@ -1,102 +1,83 @@
-import {
-  Injectable,
-  NotFoundException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+// src/skills/skills.service.ts
+
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Skills } from './entities/skill.entity';
+import { Model, Types } from 'mongoose';
+import { Skills, SkillsDocument } from './entities/skill.entity';
 import { CreateSkillsDto } from './dto/create-skill.dto';
-import { UpdateSkillDto } from './dto/update-skill.dto';
+import { UpdateSkillsDto } from './dto/update-skill.dto';
+
 @Injectable()
 export class SkillsService {
   constructor(
-    @InjectModel(Skills.name) private readonly skillsModel: Model<Skills>,
+    @InjectModel(Skills.name) private skillsModel: Model<SkillsDocument>,
   ) {}
 
-  async create(createDto: CreateSkillsDto): Promise<Skills> {
-    try {
-      const newSkills = new this.skillsModel(createDto);
-      return await newSkills.save();
-    } catch (error) {
-      // You can log error if needed: console.error(error);
-      throw new InternalServerErrorException('Failed to create skills');
-    }
+  // Yangi Skills yaratish
+  async create(createSkillsDto: CreateSkillsDto): Promise<Skills> {
+    const createdSkills = new this.skillsModel({
+      ...createSkillsDto,
+      courseId: new Types.ObjectId(createSkillsDto.courseId),
+    });
+    return createdSkills.save();
   }
 
-  async findAll(
-    page: number,
-    limit: number,
-    search?: string,
-    category?: string,
-  ): Promise<{ data: Skills[]; total: number; page: number; limit: number }> {
-    try {
-      const query: any = {};
-
-      // category filter
-      if (category) {
-        query.category = { $regex: category, $options: 'i' };
-      }
-
-      // search agar kelsa category yoki items ichida qidirish
-      if (search) {
-        query.$or = [
-          { category: { $regex: search, $options: 'i' } },
-          { items: { $regex: search, $options: 'i' } },
-          // 'items' array bo'lgani uchun, regex bilan qidirish items ichidagi stringlarni ham qamrab oladi
-        ];
-      }
-
-      const total = await this.skillsModel.countDocuments(query).exec();
-      const data = await this.skillsModel
-        .find(query)
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .exec();
-
-      return { data, total, page, limit };
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch skills');
-    }
+  // Barcha Skills hujjatlarini olish
+  async findAll(): Promise<Skills[]> {
+    return this.skillsModel.find().populate('courseId').exec();
   }
 
+  // Bitta Skills hujjatini ID bo'yicha topish
   async findOne(id: string): Promise<Skills> {
-    try {
-      const skill = await this.skillsModel.findById(id).exec();
-      if (!skill) {
-        throw new NotFoundException(`Skills with ID ${id} not found`);
-      }
-      return skill;
-    } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Failed to retrieve the skill');
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid ID format');
     }
+    const skills = await this.skillsModel
+      .findById(id)
+      .populate('courseId')
+      .exec();
+    if (!skills) {
+      throw new NotFoundException('Skills not found');
+    }
+    return skills;
   }
 
-  async update(id: string, updateDto: UpdateSkillDto): Promise<Skills> {
-    try {
-      const updatedSkill = await this.skillsModel
-        .findByIdAndUpdate(id, updateDto, { new: true, runValidators: true })
-        .exec();
-      if (!updatedSkill) {
-        throw new NotFoundException(`Skills with ID ${id} not found`);
-      }
-      return updatedSkill;
-    } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Failed to update the skills');
+  // Skills hujjatini yangilash
+  async update(id: string, updateSkillsDto: UpdateSkillsDto): Promise<Skills> {
+    if (
+      updateSkillsDto.courseId &&
+      !Types.ObjectId.isValid(updateSkillsDto.courseId)
+    ) {
+      throw new NotFoundException('Invalid courseId format');
     }
+
+    const updatedSkills = await this.skillsModel
+      .findByIdAndUpdate(
+        id,
+        {
+          ...updateSkillsDto,
+          ...(updateSkillsDto.courseId && {
+            courseId: new Types.ObjectId(updateSkillsDto.courseId),
+          }),
+        },
+        { new: true },
+      )
+      .populate('courseId')
+      .exec();
+
+    if (!updatedSkills) {
+      throw new NotFoundException('Skills not found');
+    }
+
+    return updatedSkills;
   }
 
-  async remove(id: string): Promise<void> {
-    try {
-      const result = await this.skillsModel.findByIdAndDelete(id).exec();
-      if (!result) {
-        throw new NotFoundException(`Skills with ID ${id} not found`);
-      }
-    } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Failed to delete the skills');
+  // Skills hujjatini o'chirish
+  async remove(id: string): Promise<Skills> {
+    const deletedSkills = await this.skillsModel.findByIdAndDelete(id).exec();
+    if (!deletedSkills) {
+      throw new NotFoundException('Skills not found');
     }
+    return deletedSkills;
   }
 }

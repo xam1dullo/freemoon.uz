@@ -1,28 +1,35 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+// src/tools/dto/create-tools.dto.ts
 
-class ToolItemDto {
-  @ApiProperty({ description: 'Asbob nomi' })
-  @IsString()
-  readonly name: string;
-
-  @ApiProperty({ description: 'Asbobning ikon URL manzili' })
-  @IsString()
-  readonly icon: string;
-}
+import {
+  IsOptional,
+  IsString,
+  IsArray,
+  ArrayNotEmpty,
+  IsMongoId,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateToolsDto {
-  @ApiProperty({ description: 'Asboblar kategoriyasi', example: 'Asboblar' })
+  @ApiPropertyOptional({
+    description: "Asboblar kategoriyasi (masalan: 'Asboblar')",
+    example: 'Development Tools',
+  })
+  @IsOptional()
   @IsString()
-  readonly category: string;
+  category?: string;
 
   @ApiProperty({
-    description: 'Asboblar roʻyxati',
-    type: [ToolItemDto],
+    description: 'Har bir asbobning nomi va ikonkasi',
+    example: [{ name: 'Visual Studio Code', icon: 'vscode-icon.png' }],
   })
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ToolItemDto)
-  readonly items: ToolItemDto[];
+  @ArrayNotEmpty()
+  items: { name: string; icon: string }[];
+
+  @ApiProperty({
+    description: 'Kurs ID',
+    example: '64b3c3c4f1a6a30a3c3a6a1a',
+  })
+  @IsMongoId()
+  courseId: string;
 }

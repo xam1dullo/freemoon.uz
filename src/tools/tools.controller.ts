@@ -1,93 +1,87 @@
+// src/tools/tools.controller.ts
+
 import {
   Controller,
-  Post,
   Get,
-  Put,
-  Delete,
-  Param,
+  Post,
   Body,
-  Query,
+  Param,
+  Patch,
+  Delete,
 } from '@nestjs/common';
 import { ToolsService } from './tools.service';
-import { CreateToolsDto } from './dto/create-tool.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { Tools } from './entities/tool.entity';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateToolsDto } from './dto/create-tool.dto';
+import { UpdateToolDto } from './dto/update-tool.dto';
 
-@ApiTags('Tools') // Swaggerda bo'limni belgilash
+@ApiTags('tools') // Controller tagi
 @Controller('tools')
 export class ToolsController {
   constructor(private readonly toolsService: ToolsService) {}
 
-  @ApiOperation({ summary: 'Yangi asboblar qo‘shish' })
+  @Post()
+  @ApiOperation({ summary: 'Yangi asbob yaratish' })
   @ApiResponse({
     status: 201,
-    description: 'Asboblar muvaffaqiyatli yaratildi.',
+    description: 'Asbob muvaffaqiyatli yaratildi.',
+    type: Tools,
   })
-  @Post()
-  async create(@Body() dto: CreateToolsDto): Promise<Tools> {
-    return this.toolsService.create(dto);
+  @ApiResponse({ status: 400, description: 'Xatolik yuz berdi.' })
+  async create(@Body() createToolsDto: CreateToolsDto): Promise<Tools> {
+    return this.toolsService.create(createToolsDto);
   }
 
-  @ApiOperation({
-    summary: 'Barcha toollarni filter, search va pagination bilan olish',
-  })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, example: 10 })
-  @ApiQuery({ name: 'search', required: false, description: "Qidirish so'z" })
-  @ApiQuery({
-    name: 'category',
-    required: false,
-    description: "Kategoriya bo'yicha filter",
-  })
+  @Get()
+  @ApiOperation({ summary: 'Barcha asboblarni olish' })
   @ApiResponse({
     status: 200,
-    description: 'Tools muvaffaqiyatli olindi.',
-    schema: {
-      type: 'object',
-      properties: {
-        data: { type: 'array', items: { $ref: '#/components/schemas/Tools' } },
-        total: { type: 'number' },
-        page: { type: 'number' },
-        limit: { type: 'number' },
-      },
-    },
+    description: 'Muvaffaqiyatli olindi.',
+    type: [Tools],
   })
-  @Get()
-  async findAll(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('search') search?: string,
-    @Query('category') category?: string,
-  ): Promise<{ data: Tools[]; total: number; page: number; limit: number }> {
-    const pageNumber = Number(page);
-    const limitNumber = Number(limit);
-
-    return this.toolsService.findAll(pageNumber, limitNumber, search, category);
+  async findAll(): Promise<Tools[]> {
+    return this.toolsService.findAll();
   }
 
-  @ApiOperation({ summary: 'Bitta asbobni olish' })
-  @ApiResponse({ status: 200, description: 'Asbob muvaffaqiyatli topildi.' })
-  @ApiResponse({ status: 404, description: 'Asbob topilmadi.' })
   @Get(':id')
+  @ApiOperation({ summary: 'Bitta asbobni ID bo‘yicha olish' })
+  @ApiParam({ name: 'id', description: 'Asbob ID si' })
+  @ApiResponse({
+    status: 200,
+    description: 'Muvaffaqiyatli olindi.',
+    type: Tools,
+  })
+  @ApiResponse({ status: 404, description: 'Asbob topilmadi.' })
   async findOne(@Param('id') id: string): Promise<Tools> {
     return this.toolsService.findOne(id);
   }
 
-  @ApiOperation({ summary: 'Asboblarni yangilash' })
-  @ApiResponse({ status: 200, description: 'Asbob muvaffaqiyatli yangilandi.' })
-  @Put(':id')
+  @Patch(':id')
+  @ApiOperation({ summary: 'Asbobni yangilash' })
+  @ApiParam({ name: 'id', description: 'Asbob ID si' })
+  @ApiResponse({
+    status: 200,
+    description: 'Muvaffaqiyatli yangilandi.',
+    type: Tools,
+  })
+  @ApiResponse({ status: 404, description: 'Asbob topilmadi.' })
   async update(
     @Param('id') id: string,
-    @Body() dto: CreateToolsDto,
+    @Body() updateToolsDto: UpdateToolDto,
   ): Promise<Tools> {
-    return this.toolsService.update(id, dto);
+    return this.toolsService.update(id, updateToolsDto);
   }
 
-  @ApiOperation({ summary: 'Asboblarni o‘chirish' })
-  @ApiResponse({ status: 200, description: 'Asbob muvaffaqiyatli o‘chirildi.' })
-  @ApiResponse({ status: 404, description: 'Asbob topilmadi.' })
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<void> {
-    return this.toolsService.delete(id);
+  @ApiOperation({ summary: 'Asbobni o‘chirish' })
+  @ApiParam({ name: 'id', description: 'Asbob ID si' })
+  @ApiResponse({
+    status: 200,
+    description: 'Muvaffaqiyatli o‘chirildi.',
+    type: Tools,
+  })
+  @ApiResponse({ status: 404, description: 'Asbob topilmadi.' })
+  async remove(@Param('id') id: string): Promise<Tools> {
+    return this.toolsService.remove(id);
   }
 }
