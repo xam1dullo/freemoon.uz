@@ -152,4 +152,50 @@ export class CoursesController {
     });
     return { url: result.url };
   }
+
+  @ApiOperation({ summary: 'Rasm yuklash' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Rasmni yuklash uchun fayl maydoni',
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Rasm muvaffaqiyatli yuklandi.',
+    schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', example: 'https://example.com/image.jpg' },
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Fayl yuklashda xato yuz berdi.',
+  })
+  @Post('image')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: memoryStorage(),
+    }),
+  )
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+
+    const fileBase64 = file.buffer.toString('base64');
+    const result = await this.imageKitService.upload({
+      file: fileBase64,
+      fileName: file.originalname,
+    });
+    return { url: result.url };
+  }
 }

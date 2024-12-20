@@ -19,6 +19,9 @@ export class Course {
   @Prop({ default: 0 })
   price: number;
 
+  @Prop({ trim: true })
+  image_url: string;
+
   @Prop({
     type: Types.ObjectId,
     ref: Category.name,

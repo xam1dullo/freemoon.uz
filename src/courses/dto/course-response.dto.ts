@@ -36,4 +36,9 @@ export class CourseResponseDto {
 
   @ApiProperty({ description: 'Yangilangan vaqt' })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Mentorning rasmi URL manzili',
+  })
+  readonly image_url?: string;
 }

@@ -35,4 +35,13 @@ export class CreateCourseDto {
   @IsString()
   @IsNotEmpty()
   category: string;
+
+  @ApiProperty({
+    description: 'Course rasmi URL manzili',
+    example: 'https://example.com/images/course.jpg',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  readonly image_url?: string;
 }
