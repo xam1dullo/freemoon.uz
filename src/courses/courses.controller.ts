@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Query,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -244,5 +245,18 @@ export class CoursesController {
       fileName: file.originalname,
     });
     return { url: result.url };
+  }
+
+  @Get('category/:categoryId')
+  async getCoursesByCategory(
+    @Param('categoryId') categoryId: string,
+  ): Promise<Course[]> {
+    try {
+      return await this.coursesService.getCoursesByCategory(categoryId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch courses by category',
+      );
+    }
   }
 }

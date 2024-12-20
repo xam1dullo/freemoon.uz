@@ -123,4 +123,20 @@ export class CoursesService {
       throw new InternalServerErrorException('Failed to delete the course');
     }
   }
+  // CoursesService ichida
+  async getCoursesByCategory(categoryId: string): Promise<Course[]> {
+    try {
+      const courses = await this.courseModel
+        .find({ category: categoryId })
+        .populate('mentor')
+        .populate('category')
+        .exec();
+
+      return courses;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch courses by category',
+      );
+    }
+  }
 }
