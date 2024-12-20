@@ -80,4 +80,15 @@ export class ToolsService {
     }
     return deletedTools;
   }
+
+  // Belli bir kurs ID bo'yicha Tools hujjatlarini olish
+  async findByCourseId(courseId: string): Promise<Tools[]> {
+    if (!Types.ObjectId.isValid(courseId)) {
+      throw new NotFoundException('Invalid courseId format');
+    }
+    return this.toolsModel
+      .find({ courseId: new Types.ObjectId(courseId) })
+      .populate('courseId')
+      .exec();
+  }
 }

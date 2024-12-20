@@ -80,4 +80,15 @@ export class SkillsService {
     }
     return deletedSkills;
   }
+
+  // Belli bir kurs ID bo'yicha Tools hujjatlarini olish
+  async findByCourseId(courseId: string): Promise<Skills[]> {
+    if (!Types.ObjectId.isValid(courseId)) {
+      throw new NotFoundException('Invalid courseId format');
+    }
+    return this.skillsModel
+      .find({ courseId: new Types.ObjectId(courseId) })
+      .populate('courseId')
+      .exec();
+  }
 }

@@ -84,4 +84,21 @@ export class ToolsController {
   async remove(@Param('id') id: string): Promise<Tools> {
     return this.toolsService.remove(id);
   }
+
+  // Belli bir kurs ID bo'yicha Skills hujjatlarini olish
+  @Get('course/:courseId')
+  @ApiOperation({ summary: 'Belli bir kurs ID bo‘yicha Asboblarni olish' })
+  @ApiParam({ name: 'courseId', description: 'Kurs ID si' })
+  @ApiResponse({
+    status: 200,
+    description: 'Muvaffaqiyatli olindi.',
+    type: [Tools],
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Kurs ID noto‘g‘ri yoki ko‘nikmalar topilmadi.',
+  })
+  async findByCourseId(@Param('courseId') courseId: string): Promise<Tools[]> {
+    return this.toolsService.findByCourseId(courseId);
+  }
 }
