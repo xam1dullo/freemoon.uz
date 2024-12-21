@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Course } from 'src/courses/entities/courses.entity';
 
 export type ToolsDocument = Tools & Document;
 
@@ -11,14 +12,8 @@ export class Tools {
   @Prop({ type: [{ name: String, icon: String }], required: true })
   items: { name: string; icon: string }[]; // Har bir asbobning nomi va ikonkasi
 
-  @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
+  @Prop({ type: Types.ObjectId, ref: Course.name, required: true })
   courseId: Types.ObjectId; // Kurs ID
-
-  @Prop({ default: Date.now })
-  created_at: Date;
-
-  @Prop({ default: Date.now })
-  updated_at: Date;
 }
 
 export const ToolsSchema = SchemaFactory.createForClass(Tools);

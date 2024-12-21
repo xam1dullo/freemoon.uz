@@ -15,10 +15,14 @@ export class ToolsService {
 
   // Yangi Tools yaratish
   async create(createToolsDto: CreateToolsDto): Promise<Tools> {
+    console.log(createToolsDto);
+
     const createdTools = new this.toolsModel({
       ...createToolsDto,
       courseId: new Types.ObjectId(createToolsDto.courseId),
     });
+    console.log(createdTools);
+
     return createdTools.save();
   }
 

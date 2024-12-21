@@ -53,7 +53,7 @@ export class MentorController {
   async create(@Body() dto: CreateMentorDto): Promise<Mentor> {
     return this.mentorService.create(dto);
   }
-
+  createToolsDto
   @ApiOperation({ summary: 'Mentor uchun rasm yuklash' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({

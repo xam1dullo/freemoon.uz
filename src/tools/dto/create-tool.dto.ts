@@ -1,12 +1,6 @@
 // src/tools/dto/create-tools.dto.ts
 
-import {
-  IsOptional,
-  IsString,
-  IsArray,
-  ArrayNotEmpty,
-  IsMongoId,
-} from 'class-validator';
+import { IsOptional, IsString, IsMongoId, IsObject } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateToolsDto {
@@ -20,11 +14,13 @@ export class CreateToolsDto {
 
   @ApiProperty({
     description: 'Har bir asbobning nomi va ikonkasi',
-    example: [{ name: 'Visual Studio Code', icon: 'vscode-icon.png' }],
+    example: {
+      name: 'Visual Studio Code',
+      icon: 'http://google.com/vscode-icon.png',
+    },
   })
-  @IsArray()
-  @ArrayNotEmpty()
-  items: { name: string; icon: string }[];
+  @IsObject()
+  items: { name: string; icon: string };
 
   @ApiProperty({
     description: 'Kurs ID',

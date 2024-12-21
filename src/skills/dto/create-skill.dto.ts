@@ -3,9 +3,9 @@
 import {
   IsOptional,
   IsString,
-  IsArray,
   ArrayNotEmpty,
   IsMongoId,
+  IsNotEmpty,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -20,13 +20,11 @@ export class CreateSkillsDto {
 
   @ApiProperty({
     description: "Har bir kategoriya uchun ko'nikmalar ro'yxati",
-    example: ['JavaScript', 'TypeScript'],
-    type: [String],
+    example: 'JavaScript',
+    type: String,
   })
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsString({ each: true })
-  items: string[];
+  @IsString()
+  items: string;
 
   @ApiProperty({
     description: 'Kurs ID',
@@ -34,4 +32,14 @@ export class CreateSkillsDto {
   })
   @IsMongoId()
   courseId: string;
+}
+
+export class CreateSkillItemDto {
+  @ApiProperty({
+    description: "Qo'shiladigan ko'nikma nomi",
+    example: 'Python',
+  })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 }

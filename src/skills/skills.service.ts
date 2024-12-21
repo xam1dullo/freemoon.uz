@@ -4,7 +4,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Skills, SkillsDocument } from './entities/skill.entity';
-import { CreateSkillsDto } from './dto/create-skill.dto';
+import { CreateSkillItemDto, CreateSkillsDto } from './dto/create-skill.dto';
 import { UpdateSkillsDto } from './dto/update-skill.dto';
 
 @Injectable()
@@ -90,5 +90,41 @@ export class SkillsService {
       .find({ courseId: new Types.ObjectId(courseId) })
       .populate('courseId')
       .exec();
+  }
+
+  async addSkillItem(
+    id: string,
+    createSkillItemDto: CreateSkillItemDto,
+  ): Promise<Skills> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid Skills ID format');
+    }
+
+    const skills = await this.skillsModel.findById(id);
+    if (!skills) {
+      throw new NotFoundException('Skills not found');
+    }
+
+    skills.items.push(createSkillItemDto.name);
+    await skills.save();
+    return this.skillsModel.findById(id).populate('courseId').exec();
+  }
+  async addSkillToCourse(courseId: string, skillName: string): Promise<void> {
+    if (!Types.ObjectId.isValid(courseId)) {
+      throw new NotFoundException('Invalid courseId format');
+    }
+
+    let skills = await this.skillsModel.findOne({ courseId }).exec();
+
+    if (!skills) {
+      skills = new this.skillsModel({
+        courseId: new Types.ObjectId(courseId),
+        items: [skillName],
+      });
+    } else {
+      skills.items.push(skillName);
+    }
+
+    await skills.save();
   }
 }

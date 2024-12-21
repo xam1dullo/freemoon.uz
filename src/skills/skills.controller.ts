@@ -13,7 +13,7 @@ import { SkillsService } from './skills.service';
 
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { Skills } from './entities/skill.entity';
-import { CreateSkillsDto } from './dto/create-skill.dto';
+import { CreateSkillItemDto, CreateSkillsDto } from './dto/create-skill.dto';
 import { UpdateSkillsDto } from './dto/update-skill.dto';
 
 @ApiTags('skills') // Controller tagi
@@ -101,5 +101,23 @@ export class SkillsController {
   })
   async findByCourseId(@Param('courseId') courseId: string): Promise<Skills[]> {
     return this.skillsService.findByCourseId(courseId);
+  }
+  @Post(':id/items')
+  @ApiOperation({
+    summary: `Mavjud ko‘nikma hujjatiga bitta ko‘nikma qo‘shish yo'q bo'lsa yaratish`,
+  })
+  @ApiParam({ name: 'id', description: 'Ko‘nikma hujjatining ID si' })
+  @ApiResponse({
+    status: 201,
+    description: 'Ko‘nikma muvaffaqiyatli qo‘shildi.',
+    type: Skills,
+  })
+  @ApiResponse({ status: 400, description: 'Xatolik yuz berdi.' })
+  @ApiResponse({ status: 404, description: 'Skills topilmadi.' })
+  async addSkillItem(
+    @Param('id') id: string,
+    @Body() createSkillItemDto: CreateSkillItemDto,
+  ): Promise<Skills> {
+    return this.skillsService.addSkillItem(id, createSkillItemDto);
   }
 }

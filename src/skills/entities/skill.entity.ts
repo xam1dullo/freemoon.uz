@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Course } from 'src/courses/entities/courses.entity';
 
 export type SkillsDocument = Skills & Document;
 
@@ -11,7 +12,7 @@ export class Skills {
   @Prop({ type: [String], required: true })
   items: string[]; // Har bir kategoriya uchun ko'nikmalar ro'yxati
 
-  @Prop({ type: Types.ObjectId, ref: 'Course', required: true }) // Yangi maydon
+  @Prop({ type: Types.ObjectId, ref: Course.name, required: true }) // Yangi maydon
   courseId: Types.ObjectId; // Kurs ID
 }
 
